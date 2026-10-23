@@ -1,5 +1,5 @@
 import { readFile, writeFile, mkdir, cp, rm } from 'node:fs/promises';
-import { randomBytes, createCipheriv } from 'node:crypto';
+import { randomBytes, createCipheriv, createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve, join, isAbsolute } from 'node:path';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
@@ -20,9 +20,15 @@ export async function build({input,privateDir,baseUrl,output=join(root,'site')})
  // Only this generated directory is replaced. Never put private inputs inside it.
  if(resolve(output)!==join(root,'site'))throw new Error('Output must be the generated site directory');
  await rm(output,{recursive:true,force:true});await mkdir(join(output,'assets'),{recursive:true});
- for(const file of ['style.css','app.js','criteria.js'])await cp(join(root,'public',file),join(output,'assets',file));
+ const assetNames=['style.css','app.js','criteria.js'];
+ const assetText=await Promise.all(assetNames.map(file=>readFile(join(root,'public',file),'utf8')));
+ const version=createHash('sha256').update(assetText.join('\n')).digest('hex').slice(0,16);
+ for(let i=0;i<assetNames.length;i++){
+  const text=assetNames[i]==='app.js'?assetText[i].replace("'./criteria.js'","'./criteria.js?v="+version+"'"):assetText[i];
+  await writeFile(join(output,'assets',assetNames[i]),text);
+ }
  const template=await readFile(join(root,'public/index.html'),'utf8');
- const html=(assets,home)=>template.replaceAll('{{ASSETS}}',assets).replaceAll('{{HOME}}',home);
+ const html=(assets,home)=>template.replaceAll('{{ASSETS}}',assets).replaceAll('{{HOME}}',home).replace('style.css\"','style.css?v='+version+'\"').replace('app.js\"','app.js?v='+version+'\"');
  await writeFile(join(output,'index.html'),html('./assets/','./'));
  await writeFile(join(output,'.nojekyll'),'');
  await writeFile(join(output,'robots.txt'),'User-agent: *\nDisallow: /\n');

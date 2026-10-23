@@ -1,4 +1,4 @@
-import { criteria } from './criteria.js';
+import { criteria } from './criteria.js?v=a2861d7c740330e1';
 const title=document.querySelector('#title');
 const intro=document.querySelector('#intro');
 const status=document.querySelector('#status');
