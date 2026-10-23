@@ -3,3 +3,5 @@
 .scope-note{font-size:14px;line-height:1.7;color:#6e796e;max-width:820px}a:focus-visible{outline:3px solid #62785e;outline-offset:6px}
 
 .ai-question{margin:40px 0;padding:32px;border:1px solid #cbd6c0;border-radius:18px;background:#edf0e5}.ai-question p:last-child{font-size:17px;line-height:1.8;margin-bottom:0;max-width:810px}.credits{line-height:1.7;max-width:700px;margin:0 0 12px}
+
+.muted a,.credits a{color:inherit;text-decoration:underline;text-underline-offset:3px}.muted a:hover,.credits a:hover{color:#314d39}
