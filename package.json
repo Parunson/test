@@ -1,0 +1,1 @@
+{"name":"private-resume-reviews","private":true,"type":"module","engines":{"node":">=22"},"scripts":{"start":"node server.mjs","test":"node --test","build":"node scripts/build.mjs"}}
