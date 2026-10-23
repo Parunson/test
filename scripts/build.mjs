@@ -10,7 +10,7 @@ export async function build({input,privateDir,baseUrl,output=join(root,'site')})
  if(privateRoot===root||privateRoot.startsWith(root+'/'))throw new Error('Keep plaintext and keys outside repository');
  const records=JSON.parse(await readFile(input,'utf8'));
  if(!Array.isArray(records)||records.length!==23||new Set(records.map(r=>r.name)).size!==23)throw new Error('Expected 23 unique people');
- for(const r of records)if(typeof r.name!=='string'||r.sections?.length!==6||!r.sections.every(s=>typeof s==='string'&&s.trim()))throw new Error('Expected name and six nonempty sections');
+ for(const r of records)if(typeof r.name!=='string'||typeof r.aiQuestion!=='string'||!r.aiQuestion.trim()||r.sections?.length!==6||!r.sections.every(s=>typeof s==='string'&&s.trim()))throw new Error('Expected name, six nonempty sections and an AI question');
  await mkdir(privateRoot,{recursive:true,mode:0o700});
  const keyFile=join(privateRoot,'keys.json');
  let keys={};
