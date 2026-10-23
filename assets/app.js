@@ -7,9 +7,9 @@ let generation=0;
 const onReviewPage=/\/r\/[A-Za-z0-9_-]{24}\/$/.test(location.pathname);
 const decode=value=>Uint8Array.from(atob(value.replace(/-/g,'+').replace(/_/g,'/')),char=>char.charCodeAt(0));
 function render(review){
- if(typeof review.name!=='string'||review.sections?.length!==6||!review.sections.every(s=>typeof s==='string'))throw new Error('format');
- title.textContent=`${review.name}, это ваш разбор.`;
- intro.textContent='Что уже работает, где теряется смысл и как сделать ваш опыт понятнее с первого прочтения.';
+ if(typeof review.name!=='string'||review.sections?.length!==6||typeof review.aiQuestion!=='string'||!review.sections.every(s=>typeof s==='string'))throw new Error('format');
+ title.textContent=`${review.name}, это твой разбор.`;
+ intro.textContent='Что уже работает, где теряется смысл и как сделать твой опыт понятнее с первого прочтения.';
  criteria.forEach(([name,question],i)=>{
   const item=document.createElement('article');
   const number=document.createElement('span');number.className='number';number.textContent=`0${i+1}`;
@@ -24,6 +24,7 @@ function render(review){
   text.split(/\n\s*\n/).forEach(part=>{const p=document.createElement('p');p.textContent=part;body.append(p)});
   article.append(number,body);document.querySelector('#sections').append(article);
  });
+ document.querySelector('#ai-question').textContent=review.aiQuestion;
  status.textContent='';document.querySelector('#content').hidden=false;
 }
 async function loadReview(){
@@ -32,12 +33,13 @@ async function loadReview(){
  document.querySelector('#content').hidden=true;
  document.querySelector('#criteria').replaceChildren();
  document.querySelector('#sections').replaceChildren();
+ document.querySelector('#ai-question').textContent='';
  title.textContent=initialTitle;intro.textContent=initialIntro;status.textContent='';
  if(!onReviewPage)return;
  if(!token||!/^[A-Za-z0-9_-]{43}$/.test(token)){
-  status.textContent='В ссылке не хватает ключа. Откройте персональную ссылку целиком, включая часть после #.';
+  status.textContent='В ссылке не хватает ключа. Открой персональную ссылку целиком, включая часть после #.';
  }else{
-  status.textContent='Открываю ваш разбор…';
+  status.textContent='Открываю твой разбор…';
   try{
    const response=await fetch('./review.json',{cache:'no-store',credentials:'omit',referrerPolicy:'no-referrer'});
    if(!response.ok)throw new Error('unavailable');
@@ -48,7 +50,7 @@ async function loadReview(){
    const bytes=await crypto.subtle.decrypt({name:'AES-GCM',iv:decode(envelope.iv),additionalData:new TextEncoder().encode(id)},key,decode(envelope.data));
    if(current===generation)render(JSON.parse(new TextDecoder().decode(bytes)));
   }catch{
-   if(current===generation)status.textContent='Не удалось открыть разбор. Проверьте персональную ссылку целиком или попробуйте позже.';
+   if(current===generation)status.textContent='Не удалось открыть разбор. Проверь персональную ссылку целиком или попробуй позже.';
   }
  }
 }
